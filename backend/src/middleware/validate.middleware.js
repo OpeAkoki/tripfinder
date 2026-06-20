@@ -1,0 +1,9 @@
+// validates request body against a Zod schema before it reaches the controller
+const validate = (schema) => (req, res, next) => {
+  const result = schema.safeParse(req.body);
+  if (!result.success)
+    return res.status(400).json({ errors: result.error.flatten().fieldErrors });
+  req.body = result.data;
+  next();
+};
+module.exports = validate;

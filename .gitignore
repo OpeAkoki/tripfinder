@@ -1,0 +1,4 @@
+PROJECT_PLAYBOOK.md
+.claude/
+*.jsonl
+coverage/
