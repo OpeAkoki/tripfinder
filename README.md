@@ -1,6 +1,6 @@
 # TripFinder
 
-A travel booking web application built with Node.js, Express, React and PostgreSQL.
+A travel smart booking system web application built with Node.js, Express, React and PostgreSQL.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ psql tripfinder -f backend/schema.sql
 psql tripfinder -f backend/seed.sql
 ```
 
-**2. Backend** — API runs on http://localhost:3000
+**2. Backend** - API runs on http://localhost:3000
 
 ```bash
 cd backend
@@ -31,7 +31,7 @@ npm install
 npm start
 ```
 
-**3. Frontend** — client runs on http://localhost:5173
+**3. Frontend** - client runs on http://localhost:5173
 
 ```bash
 cd frontend
