@@ -69,6 +69,6 @@ backend/src/repositories/→ Persistence layer (parameterised SQL)
 
 **GRASP Polymorphism** — `Customer` is an abstract class. `Member` and `Guest` each override `earnPoints()` and `canUpgrade()` with their own rules. The service layer calls these methods without any `if/else` type checks; the subclass decides the behaviour.
 
-**MVC** — Express controllers parse requests and delegate to services (no business logic in controllers). React pages act as views consuming a JSON API. Domain classes and repositories form the model.
+**MVC** - Express controllers parse requests and delegate to services (no business logic in controllers). React pages act as views consuming a JSON API. Domain classes and repositories form the model.
 
-**Beyond CRUD** — JWT authentication, role-based access control (customer / advisor / admin), Zod input validation, booking cutoff enforcement, loyalty points system, and a Jest + Supertest test suite with coverage.
+**Beyond CRUD** - JWT authentication, role-based access control (customer / advisor / admin), Zod input validation, booking cutoff enforcement, loyalty points system, and a Jest + Supertest test suite with coverage.
