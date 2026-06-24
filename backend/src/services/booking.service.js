@@ -99,6 +99,14 @@ async function updateBooking(id, dto) {
 async function cancelBooking(id) {
   const existing = await bookingRepo.findById(id);
   if (!existing) throw { status: 404, message: 'Booking not found' };
+
+  const pkg = await packageRepo.findById(existing.package_id);
+  const cutoff = new Date(pkg.departure_date);
+  cutoff.setDate(cutoff.getDate() - 1);
+  cutoff.setHours(23, 59, 0, 0);
+  if (new Date() >= cutoff)
+    throw { status: 400, message: 'This booking can no longer be cancelled.' };
+
   const client = await pool.connect();
   try {
     await client.query('BEGIN');

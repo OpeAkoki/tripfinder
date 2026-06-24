@@ -48,7 +48,7 @@ async function countTravellers(packageId, excludeBookingId = null, client = pool
 
 async function findAll() {
   const { rows } = await pool.query(
-    `SELECT b.*, c.name AS customer_name, p.title AS package_title
+    `SELECT b.*, c.name AS customer_name, p.title AS package_title, p.departure_date AS package_departure_date
      FROM bookings b
      JOIN customers c ON c.id = b.customer_id
      JOIN packages  p ON p.id = b.package_id

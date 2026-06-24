@@ -47,6 +47,15 @@ export default function MyBookings() {
     });
   }
 
+  function pastCutoff(b) {
+    const pkg = packages[b.package_id];
+    if (!pkg) return false;
+    const cutoff = new Date(pkg.departure_date);
+    cutoff.setDate(cutoff.getDate() - 1);
+    cutoff.setHours(23, 59, 0, 0);
+    return new Date() >= cutoff;
+  }
+
   return (
     <div className="list-page">
       {cancelTarget && (
@@ -77,7 +86,7 @@ export default function MyBookings() {
         <div className="bookings-list">
           {bookings.map(b => {
             const pkg = packages[b.package_id];
-            const canEdit = b.status === 'pending' || b.status === 'confirmed';
+            const canEdit = (b.status === 'pending' || b.status === 'confirmed') && !pastCutoff(b);
             return (
               <div key={b.id} className="booking-row">
                 <div className="booking-row__left">

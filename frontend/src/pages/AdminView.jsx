@@ -143,8 +143,16 @@ export default function AdminView() {
     return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
+  function pastCutoff(b) {
+    if (!b.package_departure_date) return false;
+    const cutoff = new Date(b.package_departure_date);
+    cutoff.setDate(cutoff.getDate() - 1);
+    cutoff.setHours(23, 59, 0, 0);
+    return new Date() >= cutoff;
+  }
+
   return (
-    <div className="list-page">
+    <div className="list-page list-page--wide">
 
       {cancelTarget && (
         <ConfirmModal
@@ -211,7 +219,7 @@ export default function AdminView() {
                   <td>£{Number(b.total_price).toLocaleString()}</td>
                   <td><span className={`status-badge status-badge--${b.status}`}>{b.status}</span></td>
                   <td>
-                    {b.status !== 'cancelled' && (
+                    {b.status !== 'cancelled' && !pastCutoff(b) && (
                       <button className="btn-sm btn-sm--cancel"
                         onClick={() => setCancelTarget(b.id)}>
                         Cancel
@@ -228,110 +236,112 @@ export default function AdminView() {
 
       {/* ── Manage Packages tab ── */}
       {tab === 'packages' && isAdmin && (
-        <div>
-          {!showForm && (
+        <div className={showForm ? 'admin-pkg-layout' : ''}>
+
+          {/* Left: form panel (or add button above grid when closed) */}
+          {showForm ? (
+            <div className="admin-pkg-sidebar">
+              <div className="form-card">
+                <h2 className="form-card__title">{editing ? 'Edit package' : 'New package'}</h2>
+                <form onSubmit={handleSave} className="auth-form">
+                  <div className="admin-pkg-form-grid">
+                    <div className="form-group form-group--full">
+                      <label className="form-label">Title</label>
+                      <input className="form-input" name="title" value={form.title} onChange={handleFormChange} required />
+                    </div>
+                    <div className="form-group form-group--full">
+                      <label className="form-label">Destination</label>
+                      <input className="form-input" name="destination" value={form.destination} onChange={handleFormChange} required />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Price per person (£)</label>
+                      <input className="form-input" name="price_per_person" type="number" min="0" step="0.01" value={form.price_per_person} onChange={handleFormChange} required />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Capacity</label>
+                      <input className="form-input" name="capacity" type="number" min="1" value={form.capacity} onChange={handleFormChange} required />
+                    </div>
+                    <div className="form-group form-group--full">
+                      <label className="form-label">Departure date</label>
+                      <input className="form-input" name="departure_date" type="date" value={form.departure_date} onChange={handleFormChange} required />
+                    </div>
+                    <div className="form-group form-group--full">
+                      <label className="form-label">Description</label>
+                      <textarea className="form-input" name="description" value={form.description} onChange={handleFormChange} rows={2} />
+                    </div>
+                    <div className="form-group form-group--full">
+                      <label className="form-label">Package image</label>
+                      <input type="file" accept="image/*" className="form-input"
+                        onChange={handleImageUpload} disabled={uploading} />
+                      {uploading && <p style={{fontSize:'0.82rem',color:'var(--text-muted)'}}>Uploading…</p>}
+                      {imagePreview && (
+                        <img src={imagePreview} alt="preview"
+                          style={{marginTop:8,width:'100%',height:100,objectFit:'cover',borderRadius:6}} />
+                      )}
+                    </div>
+                  </div>
+                  <div className="edit-actions" style={{marginTop:16}}>
+                    <button className="btn-submit" type="submit" disabled={saving} style={{width:'auto',padding:'10px 28px'}}>
+                      {saving ? 'Saving…' : editing ? 'Save changes' : 'Create package'}
+                    </button>
+                    <button type="button" className="btn-outline-dark" onClick={() => setShowForm(false)}>Cancel</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          ) : (
             <button className="btn-primary" style={{marginBottom: 20}} onClick={startCreate}>
               + Add package
             </button>
           )}
 
-          {/* Package form */}
-          {showForm && (
-            <div className="form-card" style={{marginBottom: 28}}>
-              <h2 className="form-card__title">{editing ? 'Edit package' : 'New package'}</h2>
-              <form onSubmit={handleSave} className="auth-form">
-                <div className="admin-form-grid">
-                  <div className="form-group">
-                    <label className="form-label">Title</label>
-                    <input className="form-input" name="title" value={form.title} onChange={handleFormChange} required />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Destination</label>
-                    <input className="form-input" name="destination" value={form.destination} onChange={handleFormChange} required />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Price per person (£)</label>
-                    <input className="form-input" name="price_per_person" type="number" min="0" step="0.01" value={form.price_per_person} onChange={handleFormChange} required />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Departure date</label>
-                    <input className="form-input" name="departure_date" type="date" value={form.departure_date} onChange={handleFormChange} required />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Capacity</label>
-                    <input className="form-input" name="capacity" type="number" min="1" value={form.capacity} onChange={handleFormChange} required />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Package image</label>
-                    <input type="file" accept="image/*" className="form-input"
-                      onChange={handleImageUpload} disabled={uploading} />
-                    {uploading && <p style={{fontSize:'0.82rem',color:'var(--text-muted)'}}>Uploading…</p>}
-                    {imagePreview && (
-                      <img src={imagePreview} alt="preview"
-                        style={{marginTop:8,width:'100%',height:120,objectFit:'cover',borderRadius:6}} />
-                    )}
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Description</label>
-                  <textarea className="form-input" name="description" value={form.description} onChange={handleFormChange} rows={3} />
-                </div>
-                <div className="edit-actions">
-                  <button className="btn-submit" type="submit" disabled={saving} style={{width:'auto',padding:'10px 28px'}}>
-                    {saving ? 'Saving…' : editing ? 'Save changes' : 'Create package'}
-                  </button>
-                  <button type="button" className="btn-outline-dark" onClick={() => setShowForm(false)}>Cancel</button>
-                </div>
-              </form>
+          {/* Right: search + tiles (or full width when form closed) */}
+          <div>
+            <div className="admin-pkg-search">
+              <input
+                className="form-input"
+                placeholder="Search by destination or title…"
+                value={pkgSearch}
+                onChange={e => setPkgSearch(e.target.value)}
+              />
+              <input
+                className="form-input"
+                placeholder="Max price (£)"
+                type="number"
+                min="0"
+                value={pkgMaxPrice}
+                onChange={e => setPkgMaxPrice(e.target.value)}
+              />
             </div>
-          )}
 
-          {/* Package search bar */}
-          <div className="admin-pkg-search">
-            <input
-              className="form-input"
-              placeholder="Search by destination or title…"
-              value={pkgSearch}
-              onChange={e => setPkgSearch(e.target.value)}
-            />
-            <input
-              className="form-input"
-              placeholder="Max price (£)"
-              type="number"
-              min="0"
-              value={pkgMaxPrice}
-              onChange={e => setPkgMaxPrice(e.target.value)}
-            />
-          </div>
-
-          {/* Packages tile grid */}
-          <div className="pkg-grid">
-            {packages
-              .filter(p => {
-                const q = pkgSearch.toLowerCase();
-                const nameMatch = !q || p.title.toLowerCase().includes(q) || p.destination.toLowerCase().includes(q);
-                const priceMatch = !pkgMaxPrice || Number(p.price_per_person) <= Number(pkgMaxPrice);
-                return nameMatch && priceMatch;
-              })
-              .map(p => (
-              <div key={p.id} className="pkg-tile">
-                {p.image_url
-                  ? <img className="pkg-tile__img" src={p.image_url} alt={p.title} />
-                  : <div className="pkg-tile__img-placeholder">🏖️</div>
-                }
-                <div className="pkg-tile__body">
-                  <h3 className="pkg-tile__title">{p.title}</h3>
-                  <p className="pkg-tile__meta">{p.destination}</p>
-                  <p className="pkg-tile__meta">Departs {formatDate(p.departure_date)}</p>
-                  <p className="pkg-tile__meta">{p.capacity} seats</p>
-                  <p className="pkg-tile__price">£{Number(p.price_per_person).toLocaleString()} / person</p>
+            <div className="pkg-grid">
+              {packages
+                .filter(p => {
+                  const q = pkgSearch.toLowerCase();
+                  const nameMatch = !q || p.title.toLowerCase().includes(q) || p.destination.toLowerCase().includes(q);
+                  const priceMatch = !pkgMaxPrice || Number(p.price_per_person) <= Number(pkgMaxPrice);
+                  return nameMatch && priceMatch;
+                })
+                .map(p => (
+                <div key={p.id} className="pkg-tile">
+                  {p.image_url
+                    ? <img className="pkg-tile__img" src={p.image_url} alt={p.title} />
+                    : <div className="pkg-tile__img-placeholder">🏖️</div>
+                  }
+                  <div className="pkg-tile__body">
+                    <h3 className="pkg-tile__title">{p.title}</h3>
+                    <p className="pkg-tile__meta">{p.destination}</p>
+                    <p className="pkg-tile__meta">Departs {formatDate(p.departure_date)}</p>
+                    <p className="pkg-tile__meta">{p.capacity} seats</p>
+                    <p className="pkg-tile__price">£{Number(p.price_per_person).toLocaleString()} / person</p>
+                  </div>
+                  <div className="pkg-tile__actions">
+                    <button className="btn-sm btn-sm--edit" onClick={() => startEdit(p)}>Update</button>
+                    <button className="btn-sm btn-sm--cancel" onClick={() => setDeleteTarget(p.id)}>Delete Package</button>
+                  </div>
                 </div>
-                <div className="pkg-tile__actions">
-                  <button className="btn-sm btn-sm--edit" onClick={() => startEdit(p)}>Update</button>
-                  <button className="btn-sm btn-sm--cancel" onClick={() => setDeleteTarget(p.id)}>Delete Package</button>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
         </div>
