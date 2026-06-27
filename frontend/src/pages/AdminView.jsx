@@ -291,7 +291,7 @@ export default function AdminView() {
             </div>
           ) : (
             <button className="btn-primary" style={{marginBottom: 20}} onClick={startCreate}>
-              + Add package
+              + Add a new package
             </button>
           )}
 
