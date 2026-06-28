@@ -1,5 +1,8 @@
 PROJECT_PLAYBOOK.md
 ARCHITECTURE_FOR_UML.md
+*.md
+!README.md
+*.txt
 .claude/
 *.jsonl
 coverage/
